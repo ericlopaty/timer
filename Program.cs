@@ -21,7 +21,7 @@ namespace t
 			{
 				if (args.Length > 0 && args[0] == "?")
 				{
-					Console.WriteLine("t target WS|WC|WL|SD|SR|BI|MD|MR|DHMS");
+					Console.WriteLine("t <target> WS|WC|WL|SD|SR|BI|MD|MR|DHMS");
 					Console.WriteLine();
 					Console.WriteLine("WS - Waterfall - Static");
 					Console.WriteLine("WC - Waterfall - Collapsing");
