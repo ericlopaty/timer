@@ -9,13 +9,14 @@ namespace timer
 	{
 		private enum Display
 		{
-			Seconds, Minutes, Binary, Full
+			Days, Hours, Minutes, Seconds, Binary, Full
 		}
 
 		//private static readonly int size = Console.WindowHeight * Console.WindowWidth - 1;
 		private static Timer timer;
 		private static DateTime target;
 		private static Display display;
+		private static int lastSeconds=-1;
 
 		static void Main(string[] args)
 		{
@@ -35,8 +36,10 @@ namespace timer
 				if (args.Length >= 2) selection = args[1];
 				Console.Clear();
 				display = Display.Full;
-				if (selection.ToUpper().Contains("S")) display = Display.Seconds;
+				if (selection.ToUpper().Contains("D")) display = Display.Days;
+				if (selection.ToUpper().Contains("H")) display = Display.Hours;
 				if (selection.ToUpper().Contains("M")) display = Display.Minutes;
+				if (selection.ToUpper().Contains("S")) display = Display.Seconds;
 				if (selection.ToUpper().Contains("B")) display = Display.Binary;
 				using (timer = new Timer(100))
 				{
@@ -69,20 +72,25 @@ namespace timer
 			{
 				switch (display)
 				{
-					case Display.Minutes:
-						m = (int)Math.Ceiling(span.TotalMinutes);
+					case Display.Days:
+						m = (int)Math.Ceiling(span.TotalDays);
 						caption = string.Format("{0:#,##0}", m);
-						if (caption != Console.Title) Console.Title = caption;
+						break;
+					case Display.Hours:
+						m = (int)Math.Ceiling(span.TotalHours);
+						caption = string.Format("{0:#,##0}", m);
+						break;
+					case Display.Minutes:
+						s = (int)Math.Ceiling(span.TotalMinutes);
+						caption = string.Format("{0:#,##0}", s);
 						break;
 					case Display.Seconds:
 						s = (int)Math.Ceiling(span.TotalSeconds);
 						caption = string.Format("{0:#,##0}", s);
-						if (caption != Console.Title) Console.Title = caption;
 						break;
 					case Display.Binary:
 						s = (int)Math.Ceiling(span.TotalSeconds);
 						caption = ToBinary(s);
-						if (caption != Console.Title) Console.Title = caption;
 						break;
 					case Display.Full:
 						ToDHMS((int)Math.Ceiling(span.TotalSeconds), out d, out h, out m, out s);
@@ -91,16 +99,18 @@ namespace timer
 							(h > 0) ? string.Format("{0}:{1,2:00}:{2,2:00}", h, m, s) :
 							(m > 0) ? string.Format("{0}:{1,2:00}", m, s) :
 							string.Format("{0}", s);
-						if (caption != Console.Title)
-						{
-							Console.Title = caption;
-							Console.SetCursorPosition(0, 0);
-							Console.WriteLine(string.Format("D: {0:#,##0.00000}", span.TotalDays));
-							Console.WriteLine(string.Format("H: {0:#,##0.0000}", span.TotalHours));
-							Console.WriteLine(string.Format("M: {0:#,##0.00}", span.TotalMinutes));
-							Console.WriteLine(string.Format("S: {0:#,##0}", span.TotalSeconds));
-						}
 						break;
+				}
+				if (caption != Console.Title)
+					Console.Title = caption;
+				if (timeLeft!=lastSeconds)
+				{
+					Console.SetCursorPosition(0, 0);
+					Console.WriteLine(string.Format("D: {0:#,##0.00000}", span.TotalDays));
+					Console.WriteLine(string.Format("H: {0:#,##0.0000}", span.TotalHours));
+					Console.WriteLine(string.Format("M: {0:#,##0.00}", span.TotalMinutes));
+					Console.WriteLine(string.Format("S: {0:#,##0}", span.TotalSeconds));
+					lastSeconds = timeLeft;
 				}
 				timer.Enabled = true;
 			}
