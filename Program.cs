@@ -106,10 +106,10 @@ namespace timer
 				if (timeLeft!=lastSeconds)
 				{
 					Console.SetCursorPosition(0, 0);
-					Console.WriteLine(string.Format("D: {0:#,##0.00000}", span.TotalDays));
-					Console.WriteLine(string.Format("H: {0:#,##0.0000}", span.TotalHours));
-					Console.WriteLine(string.Format("M: {0:#,##0.00}", span.TotalMinutes));
-					Console.WriteLine(string.Format("S: {0:#,##0}", span.TotalSeconds));
+					Console.WriteLine(string.Format("D: {0:#,##0.00000}  ", span.TotalDays));
+					Console.WriteLine(string.Format("H: {0:#,##0.0000}  ", span.TotalHours));
+					Console.WriteLine(string.Format("M: {0:#,##0.00}  ", span.TotalMinutes));
+					Console.WriteLine(string.Format("S: {0:#,##0}  ", span.TotalSeconds));
 					lastSeconds = timeLeft;
 				}
 				timer.Enabled = true;
