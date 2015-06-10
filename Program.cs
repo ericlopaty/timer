@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 
-namespace t
+namespace timer
 {
 	class Program
 	{
@@ -14,6 +14,7 @@ namespace t
 
 		static readonly int size = Console.WindowHeight * Console.WindowWidth - 1;
 		static int lastSeconds = -1;
+		static Random r = new Random(DateTime.Now.Day);
 
 		static void Main(string[] args)
 		{
@@ -21,7 +22,7 @@ namespace t
 			{
 				if (args.Length > 0 && args[0] == "?")
 				{
-					Console.WriteLine("t <target> WS|WC|WL|SD|SR|BI|MD|MR|DHMS");
+					Console.WriteLine("timer <target> WS|WC|WL|SD|SR|BI|MD|MR|DHMS");
 					Console.WriteLine();
 					Console.WriteLine("WS - Waterfall - Static");
 					Console.WriteLine("WC - Waterfall - Collapsing");
@@ -136,7 +137,6 @@ namespace t
 		static void WaterfallStatic(DateTime target)
 		{
 			Console.ReadLine();
-			Random r = new Random(DateTime.Now.Day);
 			int timeLeft = (int)target.Subtract(DateTime.Now).TotalSeconds;
 			Console.Clear();
 			List<Item> items = null;
@@ -168,7 +168,6 @@ namespace t
 			int Width = Console.WindowWidth;
 			int Height = Console.WindowHeight;
 			string chars = " 123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-			Random r = new Random(DateTime.Now.Day);
 			int timeLeft = (int)target.Subtract(DateTime.Now).TotalMinutes;
 			int zero = -1;
 			Console.Clear();
@@ -225,7 +224,6 @@ namespace t
 			int Width = Console.WindowWidth;
 			int Height = Console.WindowHeight;
 			string chars = " 123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-			Random r = new Random(DateTime.Now.Day);
 			int timeLeft = (int)target.Subtract(DateTime.Now).TotalSeconds;
 			int zero = -1;
 			Console.Clear();
