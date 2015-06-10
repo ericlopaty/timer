@@ -7,21 +7,13 @@ namespace timer
 {
 	class Program
 	{
-		private enum Number
-		{
-			Decimal, Roman
-		}
-
 		private enum Display
 		{
 			Seconds, Minutes, Binary, Full
 		}
 
+		//private static readonly int size = Console.WindowHeight * Console.WindowWidth - 1;
 		private static Timer timer;
-		private static readonly int size = Console.WindowHeight * Console.WindowWidth - 1;
-		private static int lastSeconds = -1;
-		private static Random r = new Random(DateTime.Now.Day);
-		private static Number format;
 		private static DateTime target;
 		private static Display display;
 
@@ -29,38 +21,23 @@ namespace timer
 		{
 			try
 			{
+				string selection = "";
 				if (args.Length > 0 && args[0] == "?")
 				{
-					Console.WriteLine("timer <target>");
-					Console.WriteLine();
-					//Console.WriteLine("WS - Waterfall - Static");
-					//Console.WriteLine("WC - Waterfall - Collapsing");
-					//Console.WriteLine("WL - Waterfall - Ladder");
-					Console.WriteLine("SD - Seconds, decimal");
-					Console.WriteLine("SR - Seconds, roman");
-					Console.WriteLine("BI - Binary");
-					Console.WriteLine("MD - Minutes, decimal");
-					Console.WriteLine("MR - Minutes, roman");
-					Console.WriteLine("MC - Minutes, collapse");
-					Console.WriteLine("LB - Label");
+					Console.WriteLine("timer <target> M|S|B");
 					return;
 				}
 				DateTime now = DateTime.Now;
-				target = new DateTime(now.Year, now.Month, now.Day, 12, 0, 0);
-				if (now > target)
-					target = new DateTime(now.Year, now.Month, now.Day, 17, 0, 0);
-				string c = "SD";
+				DateTime noon = new DateTime(now.Year, now.Month, now.Day, 12, 0, 0);
+				DateTime quitting = new DateTime(now.Year, now.Month, now.Day, 17, 30, 0);
+				target = (DateTime.Compare(now, noon) < 0) ? noon : quitting;
 				if (args.Length >= 1) target = DateTime.Parse(args[0]);
-				if (args.Length >= 2) c = args[1];
+				if (args.Length >= 2) selection = args[1];
 				Console.Clear();
-				Console.CursorVisible = false;
-				Console.Title = string.Format("{0}: {1}", c, target);
-				format = Number.Decimal;
-				if (c.Contains("R")) format = Number.Roman;
 				display = Display.Full;
-				if (c.Contains("S")) display = Display.Seconds;
-				if (c.Contains("M")) display = Display.Minutes;
-				if (c.Contains("B")) display = Display.Binary;
+				if (selection.ToUpper().Contains("S")) display = Display.Seconds;
+				if (selection.ToUpper().Contains("M")) display = Display.Minutes;
+				if (selection.ToUpper().Contains("B")) display = Display.Binary;
 				using (timer = new Timer(100))
 				{
 					timer.Elapsed += new ElapsedEventHandler(OnTimer);
@@ -84,50 +61,94 @@ namespace timer
 		{
 			timer.Enabled = false;
 			DateTime now = DateTime.Now;
+			TimeSpan span = target.Subtract(now);
 			int d, h, m, s;
 			string caption = "";
-			int timeLeft = (int)Math.Ceiling(target.Subtract(DateTime.Now).TotalSeconds);
+			int timeLeft = (int)Math.Ceiling(span.TotalSeconds);
 			if (timeLeft >= 0)
 			{
 				switch (display)
 				{
-					case Display.Seconds:
-						s = (int)Math.Ceiling(target.Subtract(now).TotalSeconds);
-						caption = (format == Number.Roman) ? string.Format("{0}", ToRoman(s)) : string.Format("{0:#,##0}", s);
+					case Display.Minutes:
+						m = (int)Math.Ceiling(span.TotalMinutes);
+						caption = string.Format("{0:#,##0}", m);
 						if (caption != Console.Title) Console.Title = caption;
 						break;
-					case Display.Minutes:
-						m = (int)Math.Ceiling(target.Subtract(DateTime.Now).TotalMinutes);
-						caption = (format == Number.Roman) ? string.Format("{0}", ToRoman(m)) : string.Format("{0:#,##0}", m);
+					case Display.Seconds:
+						s = (int)Math.Ceiling(span.TotalSeconds);
+						caption = string.Format("{0:#,##0}", s);
 						if (caption != Console.Title) Console.Title = caption;
 						break;
 					case Display.Binary:
-						s = (int)Math.Ceiling(target.Subtract(now).TotalSeconds);
+						s = (int)Math.Ceiling(span.TotalSeconds);
 						caption = ToBinary(s);
-						if (caption != Console.Title) { Console.Title = caption; Console.WriteLine(caption); }
+						if (caption != Console.Title) Console.Title = caption;
 						break;
 					case Display.Full:
-						s = (int)Math.Ceiling(target.Subtract(now).TotalSeconds);
-						d = s / 86400;
-						s -= (d * 86400);
-						h = s / 3600;
-						s -= (h * 3600);
-						m = s / 60;
-						s -= (m * 60);
-						caption = 
-							(d > 0) ? string.Format("{0,1:#,###} Days {1}:{2,2:00}:{3,2:00}", d, h, m, s) : 
-							(h > 0) ? string.Format("{0}:{1,2:00}:{2,2:00}", h, m, s) : 
-							(m > 0) ? string.Format("{0}:{1,2:00}", m, s) : 
+						ToDHMS((int)Math.Ceiling(span.TotalSeconds), out d, out h, out m, out s);
+						caption =
+							(d > 0) ? string.Format("{0,1:#,###} {1}:{2,2:00}:{3,2:00}", d, h, m, s) :
+							(h > 0) ? string.Format("{0}:{1,2:00}:{2,2:00}", h, m, s) :
+							(m > 0) ? string.Format("{0}:{1,2:00}", m, s) :
 							string.Format("{0}", s);
-						if (caption != Console.Title) Console.Title = caption; 
-						Console.WriteLine(string.Format("   Days: {0:#,##0.0000}", target.Subtract(DateTime.Now).TotalDays));
-						Console.WriteLine(string.Format("  Hours: {0:#,##0.000}", target.Subtract(DateTime.Now).TotalHours));
-						Console.WriteLine(string.Format("Minutes: {0:#,##0.00}", target.Subtract(DateTime.Now).TotalMinutes));
-						Console.WriteLine(string.Format("Seconds: {0:#,##0.0}", target.Subtract(DateTime.Now).TotalSeconds));
+						if (caption != Console.Title)
+						{
+							Console.Title = caption;
+							Console.SetCursorPosition(0, 0);
+							Console.WriteLine(string.Format("D: {0:#,##0.00000}", span.TotalDays));
+							Console.WriteLine(string.Format("H: {0:#,##0.0000}", span.TotalHours));
+							Console.WriteLine(string.Format("M: {0:#,##0.00}", span.TotalMinutes));
+							Console.WriteLine(string.Format("S: {0:#,##0}", span.TotalSeconds));
+						}
 						break;
 				}
 				timer.Enabled = true;
 			}
+		}
+
+		private static void ToDHMS(int seconds, out int d, out int h, out int m, out int s)
+		{
+			d = seconds / 86400;
+			seconds -= (d * 86400);
+			h = seconds / 3600;
+			seconds -= (h * 3600);
+			m = seconds / 60;
+			seconds -= (m * 60);
+			s = seconds;
+		}
+
+		public static string ToRoman(int i)
+		{
+			object[,] groups = new object[,] {
+                {1000,"M"},{900,"CM"},{500,"D"},{400,"CD"},{100,"C"},{90, "XC"},{50, "L"},
+                {40, "XL"},{10, "X"},{9, "IX"},{5, "V"},{4, "IV"},{1, "I"}};
+			StringBuilder roman = new StringBuilder();
+			while (i > 0)
+			{
+				for (int j = 0; j < groups.Length; j++)
+				{
+					if ((int)groups[j, 0] <= i)
+					{
+						roman.Append((string)groups[j, 1]);
+						i -= (int)groups[j, 0];
+						break;
+					}
+				}
+			}
+			return roman.ToString();
+		}
+
+		static string ToBinary(int seconds)
+		{
+			if (seconds == 0)
+				return "0";
+			StringBuilder s = new StringBuilder();
+			while (seconds > 0)
+			{
+				s.Insert(0, string.Format("{0}", seconds % 2));
+				seconds /= 2;
+			}
+			return s.ToString();
 		}
 
 		//static void WaterfallStatic()
@@ -319,76 +340,42 @@ namespace timer
 		//	Thread.Sleep(interval);
 		//}
 
-		static void BuildItems(ref List<Item> items, ref int sum)
-		{
-			items = new List<Item>();
-			sum = 0;
-			for (int i = 0; i < size; i++)
-			{
-				items.Add(new Item(i, 35));
-				items[i].Write();
-				sum += items[i].counter;
-			}
-		}
+		//static void BuildItems(ref List<Item> items, ref int sum)
+		//{
+		//	items = new List<Item>();
+		//	sum = 0;
+		//	for (int i = 0; i < size; i++)
+		//	{
+		//		items.Add(new Item(i, 35));
+		//		items[i].Write();
+		//		sum += items[i].counter;
+		//	}
+		//}
 
-		static void Caption(int timeLeft, string suffix)
-		{
-			string caption;
-			caption = string.Format("{0:#,##0} {1}", timeLeft, suffix);
-			if (caption != Console.Title)
-				Console.Title = caption;
-		}
-
-		public static string ToRoman(int i)
-		{
-			object[,] groups = new object[,] {
-                {1000,"M"},{900,"CM"},{500,"D"},{400,"CD"},{100,"C"},{90, "XC"},{50, "L"},
-                {40, "XL"},{10, "X"},{9, "IX"},{5, "V"},{4, "IV"},{1, "I"}};
-			StringBuilder roman = new StringBuilder();
-			while (i > 0)
-			{
-				for (int j = 0; j < groups.Length; j++)
-				{
-					if ((int)groups[j, 0] <= i)
-					{
-						roman.Append((string)groups[j, 1]);
-						i -= (int)groups[j, 0];
-						break;
-					}
-				}
-			}
-			return roman.ToString();
-		}
-
-		static string ToBinary(int seconds)
-		{
-			if (seconds == 0)
-				return "0";
-			StringBuilder s = new StringBuilder();
-			while (seconds > 0)
-			{
-				s.Insert(0, string.Format("{0}", seconds % 2));
-				seconds /= 2;
-			}
-			return s.ToString();
-		}
+		//static void Caption(int timeLeft, string suffix)
+		//{
+		//	string caption;
+		//	caption = string.Format("{0:#,##0} {1}", timeLeft, suffix);
+		//	if (caption != Console.Title)
+		//		Console.Title = caption;
+		//}
 	}
 
-	class Item
-	{
-		public int counter, left, top;
-		private const string chars = " 123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-		public Item(int i, int counter)
-		{
-			this.left = i % Console.WindowWidth;
-			this.top = i / Console.WindowWidth;
-			this.counter = counter;
-		}
-		public void Write()
-		{
-			Console.SetCursorPosition(left, top);
-			Console.Write(chars.Substring(counter, 1));
-		}
-	}
+	//class Item
+	//{
+	//	public int counter, left, top;
+	//	private const string chars = " 123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	//	public Item(int i, int counter)
+	//	{
+	//		this.left = i % Console.WindowWidth;
+	//		this.top = i / Console.WindowWidth;
+	//		this.counter = counter;
+	//	}
+	//	public void Write()
+	//	{
+	//		Console.SetCursorPosition(left, top);
+	//		Console.Write(chars.Substring(counter, 1));
+	//	}
+	//}
 }
 
