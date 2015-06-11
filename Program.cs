@@ -76,7 +76,7 @@ namespace timer
 				else if (display == Display.Minutes) caption = string.Format("{0:#,##0}", (int)Math.Ceiling(span.TotalMinutes));
 				else if (display == Display.Seconds) caption = string.Format("{0:#,##0}", (int)Math.Ceiling(span.TotalSeconds));
 				else if (display == Display.Binary) caption = ToBinary((int)Math.Ceiling(span.TotalSeconds));
-				else if (display == Display.Full) caption= ToDHMS((int)Math.Ceiling(span.TotalSeconds));
+				else if (display == Display.Full) caption = ToDHMS((int)Math.Ceiling(span.TotalSeconds));
 				if (caption != Console.Title)
 					Console.Title = caption;
 				if (timeLeft != lastSeconds)
@@ -138,7 +138,14 @@ namespace timer
 				s.Insert(0, string.Format("{0}", seconds % 2));
 				seconds /= 2;
 			}
-			return s.ToString();
+			if (s.Length % 4 != 0) s.Insert(0, "".PadRight(4 - (s.Length % 4), '0'));
+			StringBuilder retVal = new StringBuilder();
+			while (s.Length > 0)
+			{
+				retVal.Append(s.ToString(0, 4) + " ");
+				s.Remove(0, 4);
+			}
+			return retVal.ToString().TrimEnd();
 		}
 
 		//static void WaterfallStatic()
