@@ -16,7 +16,7 @@ namespace timer
 		private static Timer timer;
 		private static DateTime target;
 		private static Display display;
-		private static int lastSeconds=-1;
+		private static int lastSeconds = -1;
 
 		static void Main(string[] args)
 		{
@@ -28,6 +28,7 @@ namespace timer
 					Console.WriteLine("timer <target> M|S|B");
 					return;
 				}
+				Console.CursorVisible = false;
 				DateTime now = DateTime.Now;
 				DateTime noon = new DateTime(now.Year, now.Month, now.Day, 12, 0, 0);
 				DateTime quitting = new DateTime(now.Year, now.Month, now.Day, 17, 30, 0);
@@ -70,40 +71,15 @@ namespace timer
 			int timeLeft = (int)Math.Ceiling(span.TotalSeconds);
 			if (timeLeft >= 0)
 			{
-				switch (display)
-				{
-					case Display.Days:
-						m = (int)Math.Ceiling(span.TotalDays);
-						caption = string.Format("{0:#,##0}", m);
-						break;
-					case Display.Hours:
-						m = (int)Math.Ceiling(span.TotalHours);
-						caption = string.Format("{0:#,##0}", m);
-						break;
-					case Display.Minutes:
-						s = (int)Math.Ceiling(span.TotalMinutes);
-						caption = string.Format("{0:#,##0}", s);
-						break;
-					case Display.Seconds:
-						s = (int)Math.Ceiling(span.TotalSeconds);
-						caption = string.Format("{0:#,##0}", s);
-						break;
-					case Display.Binary:
-						s = (int)Math.Ceiling(span.TotalSeconds);
-						caption = ToBinary(s);
-						break;
-					case Display.Full:
-						ToDHMS((int)Math.Ceiling(span.TotalSeconds), out d, out h, out m, out s);
-						caption =
-							(d > 0) ? string.Format("{0,1:#,###} {1}:{2,2:00}:{3,2:00}", d, h, m, s) :
-							(h > 0) ? string.Format("{0}:{1,2:00}:{2,2:00}", h, m, s) :
-							(m > 0) ? string.Format("{0}:{1,2:00}", m, s) :
-							string.Format("{0}", s);
-						break;
-				}
+				if (display == Display.Days) caption = string.Format("{0:#,##0}", (int)Math.Ceiling(span.TotalDays));
+				else if (display == Display.Hours) caption = string.Format("{0:#,##0}", (int)Math.Ceiling(span.TotalHours));
+				else if (display == Display.Minutes) caption = string.Format("{0:#,##0}", (int)Math.Ceiling(span.TotalMinutes));
+				else if (display == Display.Seconds) caption = string.Format("{0:#,##0}", (int)Math.Ceiling(span.TotalSeconds));
+				else if (display == Display.Binary) caption = ToBinary((int)Math.Ceiling(span.TotalSeconds));
+				else if (display == Display.Full) caption= ToDHMS((int)Math.Ceiling(span.TotalSeconds));
 				if (caption != Console.Title)
 					Console.Title = caption;
-				if (timeLeft!=lastSeconds)
+				if (timeLeft != lastSeconds)
 				{
 					Console.SetCursorPosition(0, 0);
 					Console.WriteLine(string.Format("D: {0:#,##0.00000}  ", span.TotalDays));
@@ -116,15 +92,19 @@ namespace timer
 			}
 		}
 
-		private static void ToDHMS(int seconds, out int d, out int h, out int m, out int s)
+		private static string ToDHMS(int seconds)
 		{
-			d = seconds / 86400;
+			int d = seconds / 86400;
 			seconds -= (d * 86400);
-			h = seconds / 3600;
+			int h = seconds / 3600;
 			seconds -= (h * 3600);
-			m = seconds / 60;
+			int m = seconds / 60;
 			seconds -= (m * 60);
-			s = seconds;
+			int s = seconds;
+			return (d > 0) ? string.Format("{0} {1}:{2,2:00}:{3,2:00}", d, h, m, s) :
+				(h > 0) ? string.Format("{0}:{1,2:00}:{2,2:00}", h, m, s) :
+				(m > 0) ? string.Format("{0}:{1,2:00}", m, s) :
+				string.Format("{0}", s);
 		}
 
 		public static string ToRoman(int i)
