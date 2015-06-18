@@ -71,9 +71,9 @@ namespace timer
 			int timeLeft = (int)Math.Ceiling(span.TotalSeconds);
 			if (timeLeft >= 0)
 			{
-				if (display == Display.Days) caption = string.Format("{0:#,##0}", (int)Math.Ceiling(span.TotalDays));
-				else if (display == Display.Hours) caption = string.Format("{0:#,##0}", (int)Math.Ceiling(span.TotalHours));
-				else if (display == Display.Minutes) caption = string.Format("{0:#,##0}", (int)Math.Ceiling(span.TotalMinutes));
+				if (display == Display.Days) caption = string.Format("{0:#,##0} ({1:#,##0})", (int)Math.Ceiling(span.TotalDays), (int)Math.Ceiling(span.TotalHours));
+				else if (display == Display.Hours) caption = string.Format("{0:#,##0} ({1:#,##0})", (int)Math.Ceiling(span.TotalHours), (int)Math.Ceiling(span.TotalMinutes));
+				else if (display == Display.Minutes) caption = string.Format("{0:#,##0} ({1:#,##0})", (int)Math.Ceiling(span.TotalMinutes), (int)Math.Ceiling(span.TotalSeconds));
 				else if (display == Display.Seconds) caption = string.Format("{0:#,##0}", (int)Math.Ceiling(span.TotalSeconds));
 				else if (display == Display.Binary) caption = ToBinary((int)Math.Ceiling(span.TotalSeconds));
 				else if (display == Display.Full) caption = ToDHMS((int)Math.Ceiling(span.TotalSeconds));
